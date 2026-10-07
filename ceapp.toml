@@ -1,0 +1,40 @@
+[app]
+name = "net.tailnet"
+version = "0.1.0"
+summary = "Named CE connections with measured upstream readiness and bounded recovery"
+runtime = "script"
+provides = []
+
+[script]
+interpreter = "python3"
+entry = "bin/ce-net"
+args = ["watch"]
+
+[daemon]
+enabled = false
+restart = "on-failure"
+
+[launch]
+contract = 1
+
+[launch.targets.watch]
+summary = "Supervise explicitly enabled CE connections"
+supervision = "manual"
+cmd = ["python3", "bin/ce-net", "watch"]
+cwd = "."
+node = "local"
+start_hint = "ce-net init, configure named services, ce-net up, then ce-net watch"
+
+[launch.targets.watch.stop]
+method = "signal"
+signal = "TERM"
+safe_to_stop = true
+safe_to_stop_reason = "Stops checks only; never sends device commands or kills shared tunnels"
+
+[launch.targets.watch.bind]
+none = true
+reason = "The watcher opens no listener; the CE node owns configured forwards"
+
+[launch.targets.watch.health]
+none = true
+reason = "Use ce-net status for dated upstream observations; process existence is not connection health"

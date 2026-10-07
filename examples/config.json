@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "node_url": "http://127.0.0.1:8844",
+  "token_file": "~/.local/share/ce/api.token",
+  "services": {
+    "example.health": {
+      "node_id": "0000000000000000000000000000000000000000000000000000000000000000",
+      "cap_file": "~/.config/ce-tailnet/example.cap",
+      "local_port": 18080,
+      "remote_port": 8080,
+      "timeout": 3,
+      "probe": {
+        "kind": "http",
+        "path": "/api/health",
+        "negative_path": "/api/no-such-route-ce-tailnet",
+        "contains": "example.app"
+      }
+    }
+  }
+}

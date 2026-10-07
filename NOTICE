@@ -1,0 +1,5 @@
+ce-tailnet reuses the CE node API and capability model.
+The integration was developed against ce-net/ce and ce-net/device-reach.
+The CE tunnel registry contract was introduced in CE commit
+4003e97b304b078cc6af0906efa9e7bbe35d337b.
+See LICENSE for the GNU Affero General Public License, version 3.

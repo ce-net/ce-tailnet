@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ce-tailnet"
+version = "0.1.0"
+description = "Measured device reachability and connection recovery over the CE mesh"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+
+[project.scripts]
+ce-net = "ce_tailnet.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ce_tailnet*"]
