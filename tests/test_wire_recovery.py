@@ -34,8 +34,12 @@ class Relay(socketserver.BaseRequestHandler):
 
 
 class EndToEnd(unittest.TestCase):
+    def make_manager(self, doc, directory):
+        return Manager(doc, directory, node=Node(doc))
+
     def test_authenticated_creation_peer_outage_and_lost_forward_recovery(self):
         forwards, rows, opened = [], [], []
+        drop_ack = getattr(self, "drop_ack", False)
         class API(BaseHTTPRequestHandler):
             def log_message(self, *args):
                 pass
@@ -61,6 +65,9 @@ class EndToEnd(unittest.TestCase):
                 row = {key: body[key] for key in ("node_id", "local_port", "remote_port")}
                 rows.append(row)
                 opened.append(row)
+                if drop_ack and len(opened) == 1:
+                    self.connection.shutdown(socket.SHUT_RDWR)
+                    return
                 self.respond(200, row)
         with tempfile.TemporaryDirectory() as tmp, http_server(Upstream) as upstream, http_server(API) as api:
             Upstream.healthy, Upstream.catchall = True, False
@@ -77,8 +84,10 @@ class EndToEnd(unittest.TestCase):
                        "negative_path": "/missing", "contains": "example.app"}}
             doc = {"version": 1, "node_url": "http://127.0.0.1:%d" % api.server_port,
                    "token_file": str(home / "token"), "services": {"test": service}}
-            manager = Manager(doc, home / "state", node=Node(doc))
+            manager = self.make_manager(doc, home / "state")
             try:
+                if drop_ack:
+                    self.assertEqual(manager.tick(enable=True, force=True)["services"]["test"]["status"], "down")
                 self.assertEqual(manager.tick(enable=True, force=True)["services"]["test"]["status"], "up")
                 self.assertEqual(len(opened), 1)
                 Upstream.healthy = False
@@ -91,7 +100,7 @@ class EndToEnd(unittest.TestCase):
                 forward.server_close()
                 thread.join(2)
                 rows.clear()
-                recovered = Manager(doc, home / "state", node=Node(doc))
+                recovered = self.make_manager(doc, home / "state")
                 self.assertEqual(recovered.tick(force=True)["services"]["test"]["status"], "up")
                 self.assertEqual(len(opened), 2, "Lost listener recreated once after registry reconciliation")
             finally:

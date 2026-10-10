@@ -1,0 +1,17 @@
+[package]
+name = "ce-tailnet"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.89"
+license = "AGPL-3.0-only"
+description = "Measured device connections and recovery over the CE mesh"
+
+[[bin]]
+name = "ce-net"
+path = "src/main.rs"
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+signal-hook = "0.3"

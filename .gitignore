@@ -8,3 +8,5 @@ state/
 .env
 AGENTS.md
 STATUS.md
+target/
+README.html
